@@ -35,7 +35,8 @@ if (!File.Exists(filePath))
 var fileName = Path.GetFileName(filePath);
 var isDecompress = false;
 var isBase64 = false;
-var output = isBase64 ? string.Empty : Path.GetDirectoryName(filePath);
+var output = string.Empty;
+var stdout = string.Empty;
 
 for (var i = 1; i < args.Length; i++)
 {
@@ -67,6 +68,9 @@ for (var i = 1; i < args.Length; i++)
     }
 }
 
+if (string.IsNullOrWhiteSpace(output) && !isBase64)
+    output = Path.GetDirectoryName(filePath);
+
 try
 {
     var buffers = File.ReadAllBytes(filePath);
@@ -93,16 +97,17 @@ try
     
     buffers = ms.GetBuffer();
     
-    if (!isDecompress && isBase64)
+    if (isBase64)
     {
-        var base64 = Convert.ToBase64String(buffers, Base64FormattingOptions.InsertLineBreaks);
-        buffers = Encoding.UTF8.GetBytes(base64);
+        stdout = isDecompress ? Encoding.UTF8.GetString(buffers) : Convert.ToBase64String(buffers, Base64FormattingOptions.InsertLineBreaks);
+
+        if (!isDecompress) buffers = Encoding.UTF8.GetBytes(stdout);
     }
 
-    if (string.IsNullOrWhiteSpace(output) && isBase64)
+    if (string.IsNullOrWhiteSpace(output))
     {
-        var base64 = Convert.ToBase64String(buffers, Base64FormattingOptions.InsertLineBreaks);
-        Console.WriteLine(base64);
+        Console.WriteLine(stdout);
+
         return;
     }
 
