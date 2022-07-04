@@ -35,7 +35,7 @@ if (!File.Exists(filePath))
 var fileName = Path.GetFileName(filePath);
 var isDecompress = false;
 var isBase64 = false;
-var output = Path.GetDirectoryName(filePath);
+var output = isBase64 ? string.Empty : Path.GetDirectoryName(filePath);
 
 for (var i = 1; i < args.Length; i++)
 {
@@ -98,7 +98,14 @@ try
         var base64 = Convert.ToBase64String(buffers, Base64FormattingOptions.InsertLineBreaks);
         buffers = Encoding.UTF8.GetBytes(base64);
     }
-    
+
+    if (string.IsNullOrWhiteSpace(output) && isBase64)
+    {
+        var base64 = Convert.ToBase64String(buffers, Base64FormattingOptions.InsertLineBreaks);
+        Console.WriteLine(base64);
+        return;
+    }
+
     using var fs = File.Open(output + "/" + fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite);
     fs.SetLength(0);
     fs.Write(buffers, 0, buffers.Length);
