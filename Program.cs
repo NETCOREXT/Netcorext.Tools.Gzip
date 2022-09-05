@@ -32,7 +32,6 @@ if (!File.Exists(filePath))
     return;
 }
 
-var fileName = Path.GetFileName(filePath);
 var isDecompress = false;
 var isBase64 = false;
 var output = string.Empty;
@@ -62,14 +61,16 @@ for (var i = 1; i < args.Length; i++)
             
             output = Path.GetFullPath(args[i]);
 
-            Directory.CreateDirectory(output);
+            var outputDirectory = Path.GetDirectoryName(output);
+            
+            Directory.CreateDirectory(outputDirectory);
 
             break;
     }
 }
 
 if (string.IsNullOrWhiteSpace(output) && !isBase64)
-    output = Path.GetDirectoryName(filePath);
+    output = filePath;
 
 try
 {
@@ -111,7 +112,7 @@ try
         return;
     }
 
-    using var fs = File.Open(output + "/" + fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+    using var fs = File.Open(output, FileMode.OpenOrCreate, FileAccess.ReadWrite);
     fs.SetLength(0);
     fs.Write(buffers, 0, buffers.Length);
 }
